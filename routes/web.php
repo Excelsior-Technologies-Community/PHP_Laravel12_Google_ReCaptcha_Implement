@@ -75,3 +75,138 @@ Route::prefix('admin')->middleware(['web', 'admin'])->group(function () {
     Route::get('chart', [DashboardController::class, 'chart'])
         ->name('dashboard.chart');
 });
+
+/*
+|--------------------------------------------------------------------------
+| Security Dashboard
+|--------------------------------------------------------------------------
+*/
+
+Route::prefix('admin')
+    ->middleware(['web', 'admin'])
+    ->group(function () {
+
+        Route::get(
+            'dashboard',
+            [DashboardController::class, 'index']
+        )->name('admin.dashboard');
+
+        /*
+        |--------------------------------------------------------------------------
+        | Submissions
+        |--------------------------------------------------------------------------
+        */
+
+        Route::get(
+            'submissions',
+            [DashboardController::class, 'submissions']
+        )->name('admin.submissions.index');
+
+        Route::get(
+            'submissions/export',
+            [DashboardController::class, 'export']
+        )->name('admin.submissions.export');
+
+        /*
+        |--------------------------------------------------------------------------
+        | Bulk Actions
+        |--------------------------------------------------------------------------
+        */
+
+        Route::post(
+            'submissions/bulk-delete',
+            [DashboardController::class, 'bulkDelete']
+        )->name('admin.submissions.bulk-delete');
+
+        Route::post(
+            'submissions/bulk-status',
+            [DashboardController::class, 'bulkStatusUpdate']
+        )->name('admin.submissions.bulk-status');
+
+        /*
+        |--------------------------------------------------------------------------
+        | Single Submission
+        |--------------------------------------------------------------------------
+        */
+
+        Route::get(
+            'submissions/{id}',
+            [DashboardController::class, 'show']
+        )->name('admin.submissions.show');
+
+        Route::delete(
+            'submissions/{id}',
+            [DashboardController::class, 'destroy']
+        )->name('admin.submissions.destroy');
+
+        /*
+        |--------------------------------------------------------------------------
+        | Status
+        |--------------------------------------------------------------------------
+        */
+
+        Route::patch(
+            'submissions/{id}/status',
+            [DashboardController::class, 'updateStatus']
+        )->name('admin.submissions.status');
+
+        /*
+        |--------------------------------------------------------------------------
+        | Priority
+        |--------------------------------------------------------------------------
+        */
+
+        Route::patch(
+            'submissions/{id}/priority',
+            [DashboardController::class, 'updatePriority']
+        )->name('admin.submissions.priority');
+
+        /*
+        |--------------------------------------------------------------------------
+        | Admin Note
+        |--------------------------------------------------------------------------
+        */
+
+        Route::patch(
+            'submissions/{id}/note',
+            [DashboardController::class, 'updateNote']
+        )->name('admin.submissions.note');
+
+        /*
+        |--------------------------------------------------------------------------
+        | Read / Unread
+        |--------------------------------------------------------------------------
+        */
+
+        Route::patch(
+            'submissions/{id}/toggle-read',
+            [DashboardController::class, 'toggleRead']
+        )->name('admin.submissions.toggle-read');
+
+        /*
+        |--------------------------------------------------------------------------
+        | Logs
+        |--------------------------------------------------------------------------
+        */
+
+        Route::get(
+            'logs',
+            [DashboardController::class, 'logs']
+        )->name('admin.logs.index');
+
+        Route::get(
+            'logs/export',
+            [DashboardController::class, 'exportLogs']
+        )->name('admin.logs.export');
+
+        /*
+        |--------------------------------------------------------------------------
+        | Charts
+        |--------------------------------------------------------------------------
+        */
+
+        Route::get(
+            'chart',
+            [DashboardController::class, 'chart']
+        )->name('dashboard.chart');
+    });

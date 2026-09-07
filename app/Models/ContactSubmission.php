@@ -21,9 +21,16 @@ class ContactSubmission extends Model
         'recaptcha_version',
         'attachment_path',
         'language',
+
+        // New management fields
+        'status',
+        'priority',
+        'admin_note',
+        'is_read',
     ];
 
     protected $casts = [
         'recaptcha_verified' => 'boolean',
+        'is_read' => 'boolean',
     ];
 }

@@ -3,194 +3,394 @@
 
 <head>
 
-    <title>Submission Details</title>
-
-    <meta charset="utf-8">
+    <meta charset="UTF-8">
 
     <meta
         name="viewport"
-        content="width=device-width, initial-scale=1"
-    >
+        content="width=device-width, initial-scale=1">
+
+    <title>
+        Submission #{{ $submission->id }}
+    </title>
 
     <link
         rel="stylesheet"
-        href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.5.2/css/bootstrap.min.css"
-    >
+        href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/css/bootstrap.min.css">
+
+    <style>
+        body {
+            background: #f5f7fa;
+        }
+
+        .card {
+            border: none;
+            border-radius: 12px;
+        }
+
+        .info-label {
+            font-weight: bold;
+            color: #555;
+        }
+    </style>
 
 </head>
 
 <body>
 
-<div class="container py-5">
+    <div class="container py-5">
 
-    <div class="d-flex justify-content-between mb-4">
+        <div class="d-flex justify-content-between mb-4">
 
-        <h2>
-            Contact Submission
-        </h2>
+            <h3>
+                Contact Submission #{{ $submission->id }}
+            </h3>
 
-        <a
-             href="{{ route('admin.dashboard') }}"
-            class="btn btn-secondary"
-        >
-            Back to Dashboard
-        </a>
-
-    </div>
-
-
-    <div class="card shadow-sm">
-
-        <div class="card-header bg-primary text-white">
-
-            <h5 class="mb-0">
-                Submission #{{ $submission->id }}
-            </h5>
+            <a
+                href="{{ route('admin.submissions.index') }}"
+                class="btn btn-secondary">
+                Back
+            </a>
 
         </div>
 
+        @if(session('success'))
 
-        <div class="card-body">
+        <div class="alert alert-success">
+            {{ session('success') }}
+        </div>
 
-            <div class="row">
+        @endif
 
-                <div class="col-md-6 mb-3">
+        <div class="row">
 
-                    <strong>Name</strong>
+            {{-- Main Information --}}
 
-                    <p>
-                        {{ $submission->name }}
-                    </p>
+            <div class="col-md-8">
 
-                </div>
+                <div class="card shadow mb-4">
 
-                <div class="col-md-6 mb-3">
+                    <div class="card-header">
 
-                    <strong>Email</strong>
+                        <h5 class="mb-0">
+                            Submission Information
+                        </h5>
 
-                    <p>
-                        {{ $submission->email }}
-                    </p>
+                    </div>
 
-                </div>
+                    <div class="card-body">
 
-                <div class="col-md-6 mb-3">
+                        <p>
+                            <span class="info-label">
+                                Name:
+                            </span>
 
-                    <strong>Phone</strong>
+                            {{ $submission->name }}
+                        </p>
 
-                    <p>
-                        {{ $submission->phone }}
-                    </p>
+                        <p>
+                            <span class="info-label">
+                                Email:
+                            </span>
 
-                </div>
+                            {{ $submission->email }}
+                        </p>
 
-                <div class="col-md-6 mb-3">
+                        <p>
+                            <span class="info-label">
+                                Phone:
+                            </span>
 
-                    <strong>Subject</strong>
+                            {{ $submission->phone }}
+                        </p>
 
-                    <p>
-                        {{ $submission->subject }}
-                    </p>
+                        <p>
+                            <span class="info-label">
+                                Subject:
+                            </span>
 
-                </div>
+                            {{ $submission->subject }}
+                        </p>
 
-                <div class="col-md-12 mb-3">
+                        <p>
+                            <span class="info-label">
+                                Message:
+                            </span>
+                        </p>
 
-                    <strong>Message</strong>
+                        <div class="alert alert-light">
+                            {!! nl2br(e($submission->message)) !!}
+                        </div>
 
-                    <div class="border rounded p-3">
-                        {{ $submission->message }}
+                        <p>
+                            <span class="info-label">
+                                IP Address:
+                            </span>
+
+                            {{ $submission->ip_address }}
+                        </p>
+
+                        <p>
+                            <span class="info-label">
+                                reCAPTCHA:
+                            </span>
+
+                            @if($submission->recaptcha_verified)
+
+                            <span class="badge badge-success">
+                                Verified
+                            </span>
+
+                            @else
+
+                            <span class="badge badge-danger">
+                                Failed
+                            </span>
+
+                            @endif
+
+                        </p>
+
+                        <p>
+                            <span class="info-label">
+                                reCAPTCHA Version:
+                            </span>
+
+                            {{ strtoupper($submission->recaptcha_version ?? 'N/A') }}
+                        </p>
+
+                        <p>
+                            <span class="info-label">
+                                Language:
+                            </span>
+
+                            {{ $submission->language ?? 'en' }}
+                        </p>
+
+                        <p>
+                            <span class="info-label">
+                                Created:
+                            </span>
+
+                            {{ $submission->created_at->format('d-m-Y H:i:s') }}
+                        </p>
+
+                        @if($submission->attachment_path)
+
+                        <a
+                            href="{{ asset('storage/' . $submission->attachment_path) }}"
+                            target="_blank"
+                            class="btn btn-outline-primary">
+                            View Attachment
+                        </a>
+
+                        @endif
+
                     </div>
 
                 </div>
 
-                <div class="col-md-6 mb-3">
+            </div>
 
-                    <strong>IP Address</strong>
+            {{-- Management --}}
 
-                    <p>
-                        {{ $submission->ip_address }}
-                    </p>
+            <div class="col-md-4">
+
+                {{-- Status --}}
+
+                <div class="card shadow mb-4">
+
+                    <div class="card-header">
+
+                        <strong>
+                            Status
+                        </strong>
+
+                    </div>
+
+                    <div class="card-body">
+
+                        <form
+                            method="POST"
+                            action="{{ route('admin.submissions.status', $submission->id) }}">
+
+                            @csrf
+
+                            @method('PATCH')
+
+                            <select
+                                name="status"
+                                class="form-control mb-2">
+
+                                <option
+                                    value="new"
+                                    {{ $submission->status === 'new' ? 'selected' : '' }}>
+                                    New
+                                </option>
+
+                                <option
+                                    value="read"
+                                    {{ $submission->status === 'read' ? 'selected' : '' }}>
+                                    Read
+                                </option>
+
+                                <option
+                                    value="replied"
+                                    {{ $submission->status === 'replied' ? 'selected' : '' }}>
+                                    Replied
+                                </option>
+
+                                <option
+                                    value="closed"
+                                    {{ $submission->status === 'closed' ? 'selected' : '' }}>
+                                    Closed
+                                </option>
+
+                            </select>
+
+                            <button
+                                class="btn btn-primary btn-block">
+                                Update Status
+                            </button>
+
+                        </form>
+
+                    </div>
 
                 </div>
 
-                <div class="col-md-6 mb-3">
+                {{-- Priority --}}
 
-                    <strong>reCAPTCHA Status</strong>
+                <div class="card shadow mb-4">
 
-                    <p>
+                    <div class="card-header">
 
-                        @if($submission->recaptcha_verified)
+                        <strong>
+                            Priority
+                        </strong>
 
-                            <span class="badge badge-success">
-                                Verified Human
-                            </span>
+                    </div>
+
+                    <div class="card-body">
+
+                        <form
+                            method="POST"
+                            action="{{ route('admin.submissions.priority', $submission->id) }}">
+
+                            @csrf
+
+                            @method('PATCH')
+
+                            <select
+                                name="priority"
+                                class="form-control mb-2">
+
+                                <option
+                                    value="low"
+                                    {{ $submission->priority === 'low' ? 'selected' : '' }}>
+                                    Low
+                                </option>
+
+                                <option
+                                    value="medium"
+                                    {{ $submission->priority === 'medium' ? 'selected' : '' }}>
+                                    Medium
+                                </option>
+
+                                <option
+                                    value="high"
+                                    {{ $submission->priority === 'high' ? 'selected' : '' }}>
+                                    High
+                                </option>
+
+                            </select>
+
+                            <button
+                                class="btn btn-warning btn-block">
+                                Update Priority
+                            </button>
+
+                        </form>
+
+                    </div>
+
+                </div>
+
+                {{-- Admin Note --}}
+
+                <div class="card shadow mb-4">
+
+                    <div class="card-header">
+
+                        <strong>
+                            Internal Admin Note
+                        </strong>
+
+                    </div>
+
+                    <div class="card-body">
+
+                        <form
+                            method="POST"
+                            action="{{ route('admin.submissions.note', $submission->id) }}">
+
+                            @csrf
+
+                            @method('PATCH')
+
+                            <textarea
+                                name="admin_note"
+                                class="form-control mb-2"
+                                rows="6"
+                                placeholder="Write internal note...">{{ $submission->admin_note }}</textarea>
+
+                            <button
+                                class="btn btn-success btn-block">
+                                Save Note
+                            </button>
+
+                        </form>
+
+                    </div>
+
+                </div>
+
+                {{-- Read Status --}}
+
+                <div class="card shadow">
+
+                    <div class="card-body text-center">
+
+                        @if($submission->is_read)
+
+                        <p class="text-success">
+                            ✓ This submission has been read.
+                        </p>
 
                         @else
 
-                            <span class="badge badge-danger">
-                                Verification Failed
-                            </span>
+                        <p class="text-danger">
+                            ● This submission is unread.
+                        </p>
 
                         @endif
 
-                    </p>
+                        <form
+                            method="POST"
+                            action="{{ route('admin.submissions.toggle-read', $submission->id) }}">
 
-                </div>
+                            @csrf
 
-                <div class="col-md-6 mb-3">
+                            @method('PATCH')
 
-                    <strong>reCAPTCHA Version</strong>
+                            <button
+                                class="btn btn-info btn-block">
+                                Mark as
+                                {{ $submission->is_read ? 'Unread' : 'Read' }}
+                            </button>
 
-                    <p>
-                        {{ $submission->recaptcha_version ?? 'v2' }}
-                    </p>
+                        </form>
 
-                </div>
-
-                <div class="col-md-6 mb-3">
-
-                    <strong>Language</strong>
-
-                    <p>
-                        {{ $submission->language ?? 'en' }}
-                    </p>
-
-                </div>
-
-                <div class="col-md-12 mb-3">
-
-                    <strong>Attachment</strong>
-
-                    <p>
-                        @if($submission->attachment_path)
-                            <a href="{{ asset('storage/' . $submission->attachment_path) }}" target="_blank">
-                                Download Attachment
-                            </a>
-                        @else
-                            <span class="text-muted">No attachment</span>
-                        @endif
-                    </p>
-
-                </div>
-
-                <div class="col-md-12 mb-3">
-
-                    <strong>User Agent</strong>
-
-                    <p class="text-muted">
-                        {{ $submission->user_agent }}
-                    </p>
-
-                </div>
-
-                <div class="col-md-12">
-
-                    <strong>Submitted At</strong>
-
-                    <p>
-                        {{ $submission->created_at->format('d M Y H:i:s') }}
-                    </p>
+                    </div>
 
                 </div>
 
@@ -199,8 +399,6 @@
         </div>
 
     </div>
-
-</div>
 
 </body>
 
