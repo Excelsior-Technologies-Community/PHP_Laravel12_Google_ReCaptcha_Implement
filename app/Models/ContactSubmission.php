@@ -18,6 +18,9 @@ class ContactSubmission extends Model
         'ip_address',
         'user_agent',
         'recaptcha_verified',
+        'recaptcha_version',
+        'attachment_path',
+        'language',
     ];
 
     protected $casts = [

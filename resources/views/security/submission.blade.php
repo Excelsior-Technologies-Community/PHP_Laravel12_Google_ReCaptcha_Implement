@@ -30,7 +30,7 @@
         </h2>
 
         <a
-            href="{{ route('security.dashboard') }}"
+             href="{{ route('admin.dashboard') }}"
             class="btn btn-secondary"
         >
             Back to Dashboard
@@ -64,7 +64,6 @@
 
                 </div>
 
-
                 <div class="col-md-6 mb-3">
 
                     <strong>Email</strong>
@@ -74,7 +73,6 @@
                     </p>
 
                 </div>
-
 
                 <div class="col-md-6 mb-3">
 
@@ -86,7 +84,6 @@
 
                 </div>
 
-
                 <div class="col-md-6 mb-3">
 
                     <strong>Subject</strong>
@@ -96,7 +93,6 @@
                     </p>
 
                 </div>
-
 
                 <div class="col-md-12 mb-3">
 
@@ -108,7 +104,6 @@
 
                 </div>
 
-
                 <div class="col-md-6 mb-3">
 
                     <strong>IP Address</strong>
@@ -118,7 +113,6 @@
                     </p>
 
                 </div>
-
 
                 <div class="col-md-6 mb-3">
 
@@ -144,6 +138,41 @@
 
                 </div>
 
+                <div class="col-md-6 mb-3">
+
+                    <strong>reCAPTCHA Version</strong>
+
+                    <p>
+                        {{ $submission->recaptcha_version ?? 'v2' }}
+                    </p>
+
+                </div>
+
+                <div class="col-md-6 mb-3">
+
+                    <strong>Language</strong>
+
+                    <p>
+                        {{ $submission->language ?? 'en' }}
+                    </p>
+
+                </div>
+
+                <div class="col-md-12 mb-3">
+
+                    <strong>Attachment</strong>
+
+                    <p>
+                        @if($submission->attachment_path)
+                            <a href="{{ asset('storage/' . $submission->attachment_path) }}" target="_blank">
+                                Download Attachment
+                            </a>
+                        @else
+                            <span class="text-muted">No attachment</span>
+                        @endif
+                    </p>
+
+                </div>
 
                 <div class="col-md-12 mb-3">
 
@@ -154,7 +183,6 @@
                     </p>
 
                 </div>
-
 
                 <div class="col-md-12">
 

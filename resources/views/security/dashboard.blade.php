@@ -15,6 +15,9 @@
         rel="stylesheet"
         href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.5.2/css/bootstrap.min.css">
 
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js">
+    </script>
+
     <style>
         body {
             background: #f5f7fa;
@@ -33,6 +36,11 @@
         .table-card {
             border: none;
             border-radius: 12px;
+        }
+
+        .chart-container {
+            position: relative;
+            height: 300px;
         }
     </style>
 
@@ -65,7 +73,7 @@
                 </a>
 
                 <a
-                    href="{{ route('security.logs') }}"
+                    href="{{ route('admin.logs.index') }}"
                     class="btn btn-dark">
                     Security Logs
                 </a>
@@ -98,6 +106,25 @@
 
             </div>
 
+            <div class="col-md-3 mb-4">
+
+                <div class="card shadow-sm stat-card">
+
+                    <div class="card-body">
+
+                        <h6 class="text-muted">
+                            Today's Submissions
+                        </h6>
+
+                        <div class="stat-number text-info">
+                            {{ $todaySubmissions ?? 0 }}
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
 
             <div class="col-md-3 mb-4">
 
@@ -119,6 +146,45 @@
 
             </div>
 
+            <div class="col-md-3 mb-4">
+
+                <div class="card shadow-sm stat-card">
+
+                    <div class="card-body">
+
+                        <h6 class="text-muted">
+                            Blocked IPs
+                        </h6>
+
+                        <div class="stat-number text-danger">
+                            {{ $blockedIps ?? 0 }}
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+            <div class="col-md-3 mb-4">
+
+                <div class="card shadow-sm stat-card">
+
+                    <div class="card-body">
+
+                        <h6 class="text-muted">
+                            Total Logs
+                        </h6>
+
+                        <div class="stat-number text-warning">
+                            {{ $totalLogs ?? 0 }}
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
 
             <div class="col-md-3 mb-4">
 
@@ -140,7 +206,6 @@
 
             </div>
 
-
             <div class="col-md-3 mb-4">
 
                 <div class="card shadow-sm stat-card">
@@ -153,6 +218,60 @@
 
                         <div class="stat-number text-warning">
                             {{ $recaptchaErrors }}
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+
+        {{-- Charts --}}
+        <div class="row mb-4">
+
+            <div class="col-md-6 mb-4">
+
+                <div class="card shadow-sm table-card">
+
+                    <div class="card-header bg-primary text-white">
+
+                        <h5 class="mb-0">
+                            Daily Submissions
+                        </h5>
+
+                    </div>
+
+                    <div class="card-body">
+
+                        <div class="chart-container">
+                            <canvas id="dailySubmissionsChart"></canvas>
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+            <div class="col-md-6 mb-4">
+
+                <div class="card shadow-sm table-card">
+
+                    <div class="card-header bg-danger text-white">
+
+                        <h5 class="mb-0">
+                            Failed reCAPTCHA
+                        </h5>
+
+                    </div>
+
+                    <div class="card-body">
+
+                        <div class="chart-container">
+                            <canvas id="failedRecaptchaChart"></canvas>
                         </div>
 
                     </div>
@@ -244,7 +363,7 @@
                                 <td>
 
                                     <a
-                                        href="{{ route('security.submission', $submission->id) }}"
+                                        href="{{ route('admin.submissions.show', $submission->id) }}"
                                         class="btn btn-sm btn-primary">
                                         View
                                     </a>
@@ -380,6 +499,67 @@
         </div>
 
     </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const chartUrl = '{{ route('dashboard.chart') }}';
+
+            function initChart(canvasId, type, label, borderColor, dataKey) {
+                const ctx = document.getElementById(canvasId);
+                if (!ctx) return;
+
+                fetch(chartUrl + '?type=' + dataKey)
+                    .then(function (response) { return response.json(); })
+                    .then(function (chartData) {
+                        new Chart(ctx, {
+                            type: type,
+                            data: {
+                                labels: chartData.labels,
+                                datasets: [{
+                                    label: label,
+                                    data: chartData.data,
+                                    borderColor: borderColor,
+                                    backgroundColor: type === 'bar' ? borderColor : borderColor + '33',
+                                    fill: type === 'line',
+                                    tension: 0.3,
+                                    pointRadius: 3,
+                                    pointHoverRadius: 5
+                                }]
+                            },
+                            options: {
+                                responsive: true,
+                                maintainAspectRatio: false,
+                                scales: {
+                                    y: {
+                                        beginAtZero: true,
+                                        ticks: {
+                                            stepSize: 1
+                                        }
+                                    },
+                                    x: {
+                                        ticks: {
+                                            maxTicksLimit: 10
+                                        }
+                                    }
+                                },
+                                plugins: {
+                                    legend: {
+                                        display: true,
+                                        position: 'top'
+                                    }
+                                }
+                            }
+                        });
+                    })
+                    .catch(function (error) {
+                        console.error('Failed to load chart data:', error);
+                    });
+            }
+
+            initChart('dailySubmissionsChart', 'line', 'Daily Submissions', '#3b82f6', 'daily_submissions');
+            initChart('failedRecaptchaChart', 'bar', 'Failed reCAPTCHA', '#ef4444', 'failed_recaptcha');
+        });
+    </script>
 
 </body>
 

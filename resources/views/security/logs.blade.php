@@ -39,12 +39,99 @@
 
         </div>
 
-        <a
-            href="{{ route('security.dashboard') }}"
-            class="btn btn-primary"
-        >
-            Dashboard
-        </a>
+        <div>
+            <a
+                 href="{{ route('admin.dashboard') }}"
+                class="btn btn-primary"
+            >
+                Dashboard
+            </a>
+
+            <a
+                href="{{ route('admin.logs.export') }}"
+                class="btn btn-success ml-2"
+            >
+                Export to CSV
+            </a>
+
+        </div>
+
+    </div>
+
+
+    {{-- Filters --}}
+
+    <div class="card shadow-sm mb-4">
+
+        <div class="card-body">
+
+            <form method="GET" action="{{ route('admin.logs.index') }}">
+
+                <div class="form-row">
+
+                    <div class="col-md-4 mb-3">
+
+                        <input
+                            type="text"
+                            name="search"
+                            class="form-control"
+                            placeholder="Search by IP or email..."
+                            value="{{ request('search') }}"
+                        >
+
+                    </div>
+
+                    <div class="col-md-3 mb-3">
+
+                        <select name="event_type" class="form-control">
+
+                            <option value="">All Event Types</option>
+
+                            <option value="recaptcha_failed" {{ request('event_type') === 'recaptcha_failed' ? 'selected' : '' }}>
+                                reCAPTCHA Failed
+                            </option>
+
+                            <option value="recaptcha_missing" {{ request('event_type') === 'recaptcha_missing' ? 'selected' : '' }}>
+                                reCAPTCHA Missing
+                            </option>
+
+                            <option value="recaptcha_error" {{ request('event_type') === 'recaptcha_error' ? 'selected' : '' }}>
+                                reCAPTCHA Error
+                            </option>
+
+                            <option value="ip_blocked" {{ request('event_type') === 'ip_blocked' ? 'selected' : '' }}>
+                                IP Blocked
+                            </option>
+
+                            <option value="email_error" {{ request('event_type') === 'email_error' ? 'selected' : '' }}>
+                                Email Error
+                            </option>
+
+                        </select>
+
+                    </div>
+
+                    <div class="col-md-2 mb-3">
+
+                        <button type="submit" class="btn btn-primary">
+                            Filter
+                        </button>
+
+                    </div>
+
+                    <div class="col-md-3 mb-3">
+
+                        <a href="{{ route('admin.logs.index') }}" class="btn btn-secondary">
+                            Reset
+                        </a>
+
+                    </div>
+
+                </div>
+
+            </form>
+
+        </div>
 
     </div>
 
@@ -96,7 +183,6 @@
                                     {{ $log->id }}
                                 </td>
 
-
                                 {{-- Event --}}
 
                                 <td>
@@ -129,13 +215,11 @@
 
                                 </td>
 
-
                                 {{-- IP Address --}}
 
                                 <td>
                                     {{ $log->ip_address ?? '-' }}
                                 </td>
-
 
                                 {{-- Email --}}
 
@@ -143,13 +227,11 @@
                                     {{ $log->email ?? '-' }}
                                 </td>
 
-
                                 {{-- Description --}}
 
                                 <td>
                                     {{ $log->description ?? '-' }}
                                 </td>
-
 
                                 {{-- User Agent --}}
 
@@ -160,7 +242,6 @@
                                     </small>
 
                                 </td>
-
 
                                 {{-- Time --}}
 
