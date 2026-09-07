@@ -2,65 +2,66 @@
 
 namespace App\Rules;
 
-use App\Models\SecurityLog;
-use Illuminate\Contracts\Validation\Rule;
+use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Support\Facades\Http;
 
-class RecaptchaV3 implements Rule
+class RecaptchaV3 implements ValidationRule
 {
-    public function passes($attribute, $value)
-    {
-        try {
-            $response = Http::timeout(10)->get(
-                'https://www.google.com/recaptcha/api/siteverify',
-                [
-                    'secret'   => config('services.recaptcha.v3_secret', config('services.recaptcha.secret')),
-                    'response' => $value,
-                    'remoteip' => request()->ip(),
-                ]
-            );
+    public function validate(
+        string $attribute,
+        mixed $value,
+        \Closure $fail
+    ): void {
 
-            $result = $response->json();
-
-            $score = $result['score'] ?? 0;
-
-            if (
-                $response->successful() &&
-                isset($result['success']) &&
-                $result['success'] === true &&
-                $score >= 0.5
-            ) {
-                return true;
-            }
-
-            $errorCodes = $result['error-codes'] ?? [];
-
-            SecurityLog::create([
-                'ip_address' => request()->ip(),
-                'email' => request()->input('email'),
-                'event_type' => 'recaptcha_failed',
-                'description' => !empty($errorCodes)
-                    ? 'Google reCAPTCHA v3 verification failed: ' . implode(', ', $errorCodes)
-                    : 'Google reCAPTCHA v3 score too low: ' . $score,
-                'user_agent' => request()->userAgent(),
-            ]);
-
-            return false;
-        } catch (\Throwable $e) {
-            SecurityLog::create([
-                'ip_address' => request()->ip(),
-                'email' => request()->input('email'),
-                'event_type' => 'recaptcha_error',
-                'description' => 'Unable to communicate with Google reCAPTCHA service.',
-                'user_agent' => request()->userAgent(),
-            ]);
-
-            return false;
+        if (!$value) {
+            $fail('reCAPTCHA verification is required.');
+            return;
         }
-    }
 
-    public function message()
-    {
-        return 'Google reCAPTCHA verification failed. Please try again.';
+        $response = Http::asForm()->post(
+            'https://www.google.com/recaptcha/api/siteverify',
+            [
+                'secret' => config('services.recaptcha.secret'),
+                'response' => $value,
+                'remoteip' => request()->ip(),
+            ]
+        );
+
+        if (!$response->successful()) {
+            $fail('Unable to verify reCAPTCHA.');
+            return;
+        }
+
+        $data = $response->json();
+
+        if (!($data['success'] ?? false)) {
+            $fail('Google reCAPTCHA verification failed.');
+            return;
+        }
+
+        $score = (float) ($data['score'] ?? 0);
+
+        $expectedAction = config(
+            'services.recaptcha.action',
+            'submit'
+        );
+
+        if (
+            isset($data['action']) &&
+            $data['action'] !== $expectedAction
+        ) {
+            $fail('Invalid reCAPTCHA action.');
+            return;
+        }
+
+        $minimumScore = (float) config(
+            'services.recaptcha.score_threshold',
+            0.5
+        );
+
+        if ($score < $minimumScore) {
+            $fail('reCAPTCHA score is too low.');
+            return;
+        }
     }
 }

@@ -3,44 +3,60 @@
 
 <head>
 
-    <title>Security Dashboard</title>
-
-    <meta charset="utf-8">
+    <meta charset="UTF-8">
 
     <meta
         name="viewport"
-        content="width=device-width, initial-scale=1">
+        content="width=device-width, initial-scale=1.0">
+
+    <meta
+        name="csrf-token"
+        content="{{ csrf_token() }}">
+
+    <title>Security Dashboard</title>
 
     <link
-        rel="stylesheet"
-        href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.5.2/css/bootstrap.min.css">
+        href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css"
+        rel="stylesheet">
 
-    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js">
-    </script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
     <style>
         body {
             background: #f5f7fa;
         }
 
-        .stat-card {
-            border: none;
+        .dashboard-card {
+            border: 0;
             border-radius: 12px;
+            transition: 0.2s;
+        }
+
+        .dashboard-card:hover {
+            transform: translateY(-3px);
         }
 
         .stat-number {
-            font-size: 32px;
-            font-weight: bold;
+            font-size: 30px;
+            font-weight: 700;
         }
 
         .table-card {
-            border: none;
+            border: 0;
             border-radius: 12px;
+        }
+
+        .badge {
+            font-size: 12px;
         }
 
         .chart-container {
             position: relative;
-            height: 300px;
+            height: 350px;
+        }
+
+        .pagination {
+            margin-bottom: 0;
         }
     </style>
 
@@ -48,18 +64,19 @@
 
 <body>
 
-    <div class="container py-5">
+    <div class="container-fluid py-4">
 
+        {{-- Header --}}
         <div class="d-flex justify-content-between align-items-center mb-4">
 
             <div>
 
-                <h2>
-                    Security Dashboard
+                <h2 class="mb-1">
+                    🔐 Security Dashboard
                 </h2>
 
                 <p class="text-muted mb-0">
-                    Contact form and reCAPTCHA security monitoring
+                    Laravel Google reCAPTCHA Contact Form Security Monitor
                 </p>
 
             </div>
@@ -72,11 +89,20 @@
                     Contact Form
                 </a>
 
-                <a
-                    href="{{ route('admin.logs.index') }}"
-                    class="btn btn-dark">
-                    Security Logs
-                </a>
+                <form
+                    action="{{ route('admin.logout') }}"
+                    method="POST"
+                    class="d-inline">
+
+                    @csrf
+
+                    <button
+                        type="submit"
+                        class="btn btn-outline-danger">
+                        Logout
+                    </button>
+
+                </form>
 
             </div>
 
@@ -84,19 +110,20 @@
 
 
         {{-- Statistics --}}
-        <div class="row">
+        <div class="row g-4 mb-4">
 
-            <div class="col-md-3 mb-4">
+            {{-- Total --}}
+            <div class="col-xl-2 col-md-4 col-sm-6">
 
-                <div class="card shadow-sm stat-card">
+                <div class="card shadow-sm dashboard-card">
 
                     <div class="card-body">
 
-                        <h6 class="text-muted">
+                        <div class="text-muted">
                             Total Submissions
-                        </h6>
+                        </div>
 
-                        <div class="stat-number">
+                        <div class="stat-number text-primary">
                             {{ $totalSubmissions }}
                         </div>
 
@@ -106,18 +133,20 @@
 
             </div>
 
-            <div class="col-md-3 mb-4">
 
-                <div class="card shadow-sm stat-card">
+            {{-- Today --}}
+            <div class="col-xl-2 col-md-4 col-sm-6">
+
+                <div class="card shadow-sm dashboard-card">
 
                     <div class="card-body">
 
-                        <h6 class="text-muted">
-                            Today's Submissions
-                        </h6>
+                        <div class="text-muted">
+                            Today
+                        </div>
 
-                        <div class="stat-number text-info">
-                            {{ $todaySubmissions ?? 0 }}
+                        <div class="stat-number text-success">
+                            {{ $todaySubmissions }}
                         </div>
 
                     </div>
@@ -126,17 +155,19 @@
 
             </div>
 
-            <div class="col-md-3 mb-4">
 
-                <div class="card shadow-sm stat-card">
+            {{-- Verified --}}
+            <div class="col-xl-2 col-md-4 col-sm-6">
+
+                <div class="card shadow-sm dashboard-card">
 
                     <div class="card-body">
 
-                        <h6 class="text-muted">
+                        <div class="text-muted">
                             Verified
-                        </h6>
+                        </div>
 
-                        <div class="stat-number text-success">
+                        <div class="stat-number text-info">
                             {{ $verifiedSubmissions }}
                         </div>
 
@@ -146,55 +177,17 @@
 
             </div>
 
-            <div class="col-md-3 mb-4">
 
-                <div class="card shadow-sm stat-card">
+            {{-- Failed --}}
+            <div class="col-xl-2 col-md-4 col-sm-6">
 
-                    <div class="card-body">
-
-                        <h6 class="text-muted">
-                            Blocked IPs
-                        </h6>
-
-                        <div class="stat-number text-danger">
-                            {{ $blockedIps ?? 0 }}
-                        </div>
-
-                    </div>
-
-                </div>
-
-            </div>
-
-            <div class="col-md-3 mb-4">
-
-                <div class="card shadow-sm stat-card">
+                <div class="card shadow-sm dashboard-card">
 
                     <div class="card-body">
 
-                        <h6 class="text-muted">
-                            Total Logs
-                        </h6>
-
-                        <div class="stat-number text-warning">
-                            {{ $totalLogs ?? 0 }}
-                        </div>
-
-                    </div>
-
-                </div>
-
-            </div>
-
-            <div class="col-md-3 mb-4">
-
-                <div class="card shadow-sm stat-card">
-
-                    <div class="card-body">
-
-                        <h6 class="text-muted">
+                        <div class="text-muted">
                             Failed reCAPTCHA
-                        </h6>
+                        </div>
 
                         <div class="stat-number text-danger">
                             {{ $failedRecaptcha }}
@@ -206,18 +199,42 @@
 
             </div>
 
-            <div class="col-md-3 mb-4">
 
-                <div class="card shadow-sm stat-card">
+            {{-- Blocked --}}
+            <div class="col-xl-2 col-md-4 col-sm-6">
+
+                <div class="card shadow-sm dashboard-card">
 
                     <div class="card-body">
 
-                        <h6 class="text-muted">
-                            reCAPTCHA Errors
-                        </h6>
+                        <div class="text-muted">
+                            Blocked IPs
+                        </div>
 
                         <div class="stat-number text-warning">
-                            {{ $recaptchaErrors }}
+                            {{ $blockedIps }}
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            {{-- Logs --}}
+            <div class="col-xl-2 col-md-4 col-sm-6">
+
+                <div class="card shadow-sm dashboard-card">
+
+                    <div class="card-body">
+
+                        <div class="text-muted">
+                            Security Logs
+                        </div>
+
+                        <div class="stat-number text-secondary">
+                            {{ $totalLogs }}
                         </div>
 
                     </div>
@@ -229,52 +246,79 @@
         </div>
 
 
-        {{-- Charts --}}
-        <div class="row mb-4">
+        {{-- Quick Actions --}}
+        <div class="card shadow-sm table-card mb-4">
 
-            <div class="col-md-6 mb-4">
+            <div class="card-body">
 
-                <div class="card shadow-sm table-card">
+                <div class="d-flex flex-wrap gap-2">
 
-                    <div class="card-header bg-primary text-white">
+                    <a
+                        href="{{ route('admin.submissions.index') }}"
+                        class="btn btn-primary">
+                        📋 View Submissions
+                    </a>
 
-                        <h5 class="mb-0">
-                            Daily Submissions
-                        </h5>
+                    <a
+                        href="{{ route('admin.submissions.export') }}"
+                        class="btn btn-success">
+                        📥 Export Submissions CSV
+                    </a>
 
-                    </div>
+                    <a
+                        href="{{ route('admin.logs.index') }}"
+                        class="btn btn-warning">
+                        🛡️ Security Logs
+                    </a>
 
-                    <div class="card-body">
-
-                        <div class="chart-container">
-                            <canvas id="dailySubmissionsChart"></canvas>
-                        </div>
-
-                    </div>
+                    <a
+                        href="{{ route('admin.logs.export') }}"
+                        class="btn btn-dark">
+                        📥 Export Logs CSV
+                    </a>
 
                 </div>
 
             </div>
 
-            <div class="col-md-6 mb-4">
+        </div>
 
-                <div class="card shadow-sm table-card">
 
-                    <div class="card-header bg-danger text-white">
+        {{-- Chart --}}
+        <div class="card shadow-sm table-card mb-4">
 
-                        <h5 class="mb-0">
+            <div class="card-header bg-white">
+
+                <div class="d-flex justify-content-between align-items-center">
+
+                    <h5 class="mb-0">
+                        📊 Submission Analytics
+                    </h5>
+
+                    <select
+                        id="chart-type"
+                        class="form-select"
+                        style="width:220px;">
+
+                        <option value="daily_submissions">
+                            Daily Submissions
+                        </option>
+
+                        <option value="failed_recaptcha">
                             Failed reCAPTCHA
-                        </h5>
+                        </option>
 
-                    </div>
+                    </select>
 
-                    <div class="card-body">
+                </div>
 
-                        <div class="chart-container">
-                            <canvas id="failedRecaptchaChart"></canvas>
-                        </div>
+            </div>
 
-                    </div>
+            <div class="card-body">
+
+                <div class="chart-container">
+
+                    <canvas id="securityChart"></canvas>
 
                 </div>
 
@@ -286,41 +330,65 @@
         {{-- Recent Submissions --}}
         <div class="card shadow-sm table-card mb-4">
 
-            <div class="card-header bg-primary text-white">
+            <div class="card-header bg-white">
 
-                <h5 class="mb-0">
-                    Recent Contact Submissions
-                </h5>
+                <div class="d-flex justify-content-between align-items-center">
+
+                    <h5 class="mb-0">
+                        📩 Recent Submissions
+                    </h5>
+
+                    <a
+                        href="{{ route('admin.submissions.index') }}"
+                        class="btn btn-sm btn-primary">
+                        View All
+                    </a>
+
+                </div>
 
             </div>
 
-            <div class="card-body">
-
-                @if($recentSubmissions->count())
+            <div class="card-body p-0">
 
                 <div class="table-responsive">
 
-                    <table class="table table-bordered table-hover">
+                    <table class="table table-hover mb-0">
 
-                        <thead>
+                        <thead class="table-light">
 
                             <tr>
+
+                                <th>ID</th>
+
                                 <th>Name</th>
+
                                 <th>Email</th>
+
+                                <th>Phone</th>
+
                                 <th>Subject</th>
-                                <th>IP Address</th>
-                                <th>Status</th>
-                                <th>Time</th>
+
+                                <th>reCAPTCHA</th>
+
+                                <th>Date</th>
+
                                 <th>Action</th>
+
                             </tr>
 
                         </thead>
 
                         <tbody>
 
-                            @foreach($recentSubmissions as $submission)
+                            @forelse($recentSubmissions as $submission)
 
                             <tr>
+
+                                <td>
+                                    <strong>
+                                        {{ $submission->id }}
+                                    </strong>
+                                </td>
 
                                 <td>
                                     {{ $submission->name }}
@@ -331,24 +399,24 @@
                                 </td>
 
                                 <td>
-                                    {{ $submission->subject }}
+                                    {{ $submission->phone }}
                                 </td>
 
                                 <td>
-                                    {{ $submission->ip_address }}
+                                    {{ \Illuminate\Support\Str::limit($submission->subject, 30) }}
                                 </td>
 
                                 <td>
 
                                     @if($submission->recaptcha_verified)
 
-                                    <span class="badge badge-success">
-                                        Verified
+                                    <span class="badge bg-success">
+                                        Passed
                                     </span>
 
                                     @else
 
-                                    <span class="badge badge-danger">
+                                    <span class="badge bg-danger">
                                         Failed
                                     </span>
 
@@ -364,15 +432,44 @@
 
                                     <a
                                         href="{{ route('admin.submissions.show', $submission->id) }}"
-                                        class="btn btn-sm btn-primary">
+                                        class="btn btn-sm btn-outline-primary">
                                         View
                                     </a>
+
+                                    <form
+                                        action="{{ route('admin.submissions.destroy', $submission->id) }}"
+                                        method="POST"
+                                        class="d-inline delete-form">
+
+                                        @csrf
+
+                                        @method('DELETE')
+
+                                        <button
+                                            type="submit"
+                                            class="btn btn-sm btn-outline-danger">
+                                            Delete
+                                        </button>
+
+                                    </form>
 
                                 </td>
 
                             </tr>
 
-                            @endforeach
+                            @empty
+
+                            <tr>
+
+                                <td
+                                    colspan="8"
+                                    class="text-center py-4 text-muted">
+                                    No submissions found.
+                                </td>
+
+                            </tr>
+
+                            @endforelse
 
                         </tbody>
 
@@ -380,84 +477,66 @@
 
                 </div>
 
-                @else
-
-                <p class="text-muted mb-0">
-                    No contact submissions yet.
-                </p>
-
-                @endif
-
             </div>
 
         </div>
 
 
         {{-- Recent Security Logs --}}
-        <div class="card shadow-sm table-card">
+        <div class="card shadow-sm table-card mb-4">
 
-            <div class="card-header bg-dark text-white">
+            <div class="card-header bg-white">
 
-                <h5 class="mb-0">
-                    Recent Security Events
-                </h5>
+                <div class="d-flex justify-content-between align-items-center">
+
+                    <h5 class="mb-0">
+                        🛡️ Recent Security Logs
+                    </h5>
+
+                    <a
+                        href="{{ route('admin.logs.index') }}"
+                        class="btn btn-sm btn-warning">
+                        View All Logs
+                    </a>
+
+                </div>
 
             </div>
 
-            <div class="card-body">
-
-                @if($recentSecurityLogs->count())
+            <div class="card-body p-0">
 
                 <div class="table-responsive">
 
-                    <table class="table table-bordered">
+                    <table class="table table-hover mb-0">
 
-                        <thead>
+                        <thead class="table-light">
 
                             <tr>
-                                <th>Event</th>
+
+                                <th>ID</th>
+
                                 <th>IP Address</th>
+
                                 <th>Email</th>
+
+                                <th>Event</th>
+
                                 <th>Description</th>
-                                <th>Time</th>
+
+                                <th>Date</th>
+
                             </tr>
 
                         </thead>
 
                         <tbody>
 
-                            @foreach($recentSecurityLogs as $log)
+                            @forelse($recentSecurityLogs as $log)
 
                             <tr>
 
                                 <td>
-
-                                    @if($log->event_type === 'recaptcha_failed')
-
-                                    <span class="badge badge-danger">
-                                        reCAPTCHA Failed
-                                    </span>
-
-                                    @elseif($log->event_type === 'recaptcha_missing')
-
-                                    <span class="badge badge-warning">
-                                        reCAPTCHA Missing
-                                    </span>
-
-                                    @elseif($log->event_type === 'recaptcha_error')
-
-                                    <span class="badge badge-dark">
-                                        reCAPTCHA Error
-                                    </span>
-
-                                    @else
-
-                                    <span class="badge badge-secondary">
-                                        {{ $log->event_type }}
-                                    </span>
-
-                                    @endif
-
+                                    {{ $log->id }}
                                 </td>
 
                                 <td>
@@ -469,7 +548,37 @@
                                 </td>
 
                                 <td>
-                                    {{ $log->description }}
+
+                                    @if($log->event_type === 'recaptcha_failed')
+
+                                    <span class="badge bg-danger">
+                                        reCAPTCHA Failed
+                                    </span>
+
+                                    @elseif($log->event_type === 'ip_blocked')
+
+                                    <span class="badge bg-warning text-dark">
+                                        IP Blocked
+                                    </span>
+
+                                    @elseif($log->event_type === 'email_error')
+
+                                    <span class="badge bg-dark">
+                                        Email Error
+                                    </span>
+
+                                    @else
+
+                                    <span class="badge bg-secondary">
+                                        {{ $log->event_type }}
+                                    </span>
+
+                                    @endif
+
+                                </td>
+
+                                <td>
+                                    {{ \Illuminate\Support\Str::limit($log->description, 70) }}
                                 </td>
 
                                 <td>
@@ -478,7 +587,19 @@
 
                             </tr>
 
-                            @endforeach
+                            @empty
+
+                            <tr>
+
+                                <td
+                                    colspan="6"
+                                    class="text-center py-4 text-muted">
+                                    No security logs found.
+                                </td>
+
+                            </tr>
+
+                            @endforelse
 
                         </tbody>
 
@@ -486,79 +607,193 @@
 
                 </div>
 
-                @else
-
-                <p class="text-muted mb-0">
-                    No security events recorded.
-                </p>
-
-                @endif
-
             </div>
+
+        </div>
+
+
+        {{-- Dashboard Footer --}}
+        <div class="text-center text-muted py-3">
+
+            Laravel 12 · Google reCAPTCHA Security System
 
         </div>
 
     </div>
 
+
     <script>
-        document.addEventListener('DOMContentLoaded', function () {
-            const chartUrl = '{{ route('dashboard.chart') }}';
+        let securityChart = null;
 
-            function initChart(canvasId, type, label, borderColor, dataKey) {
-                const ctx = document.getElementById(canvasId);
-                if (!ctx) return;
+        /*
+        |--------------------------------------------------------------------------
+        | Load Chart
+        |--------------------------------------------------------------------------
+        */
 
-                fetch(chartUrl + '?type=' + dataKey)
-                    .then(function (response) { return response.json(); })
-                    .then(function (chartData) {
-                        new Chart(ctx, {
-                            type: type,
-                            data: {
-                                labels: chartData.labels,
-                                datasets: [{
-                                    label: label,
-                                    data: chartData.data,
-                                    borderColor: borderColor,
-                                    backgroundColor: type === 'bar' ? borderColor : borderColor + '33',
-                                    fill: type === 'line',
-                                    tension: 0.3,
-                                    pointRadius: 3,
-                                    pointHoverRadius: 5
-                                }]
-                            },
-                            options: {
-                                responsive: true,
-                                maintainAspectRatio: false,
-                                scales: {
-                                    y: {
-                                        beginAtZero: true,
-                                        ticks: {
-                                            stepSize: 1
+        function loadChart(type = 'daily_submissions') {
+
+            fetch(
+                    "{{ route('dashboard.chart') }}?type=" +
+                    encodeURIComponent(type)
+                )
+
+                .then(response => response.json())
+
+                .then(data => {
+
+                    const ctx =
+                        document.getElementById(
+                            'securityChart'
+                        ).getContext('2d');
+
+                    if (securityChart) {
+
+                        securityChart.destroy();
+
+                    }
+
+                    securityChart =
+                        new Chart(
+                            ctx, {
+                                type: 'line',
+
+                                data: {
+
+                                    labels: data.labels,
+
+                                    datasets: [
+
+                                        {
+                                            label: data.label,
+
+                                            data: data.data,
+
+                                            borderWidth: 2,
+
+                                            tension: 0.3,
+
+                                            fill: false
                                         }
-                                    },
-                                    x: {
-                                        ticks: {
-                                            maxTicksLimit: 10
-                                        }
-                                    }
+
+                                    ]
+
                                 },
-                                plugins: {
-                                    legend: {
-                                        display: true,
-                                        position: 'top'
-                                    }
-                                }
-                            }
-                        });
-                    })
-                    .catch(function (error) {
-                        console.error('Failed to load chart data:', error);
-                    });
-            }
 
-            initChart('dailySubmissionsChart', 'line', 'Daily Submissions', '#3b82f6', 'daily_submissions');
-            initChart('failedRecaptchaChart', 'bar', 'Failed reCAPTCHA', '#ef4444', 'failed_recaptcha');
-        });
+                                options: {
+
+                                    responsive: true,
+
+                                    maintainAspectRatio: false,
+
+                                    plugins: {
+
+                                        legend: {
+                                            display: true
+                                        }
+
+                                    },
+
+                                    scales: {
+
+                                        y: {
+
+                                            beginAtZero: true,
+
+                                            ticks: {
+
+                                                precision: 0
+
+                                            }
+
+                                        }
+
+                                    }
+
+                                }
+
+                            }
+                        );
+
+                })
+
+                .catch(
+                    error => console.error(
+                        'Chart loading error:',
+                        error
+                    )
+                );
+
+        }
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | Initial Chart
+        |--------------------------------------------------------------------------
+        */
+
+        document.addEventListener(
+            'DOMContentLoaded',
+            function() {
+
+                loadChart(
+                    'daily_submissions'
+                );
+
+                /*
+                |--------------------------------------------------------------------------
+                | Chart Filter
+                |--------------------------------------------------------------------------
+                */
+
+                document
+                    .getElementById('chart-type')
+                    .addEventListener(
+                        'change',
+                        function() {
+
+                            loadChart(
+                                this.value
+                            );
+
+                        }
+                    );
+
+
+                /*
+                |--------------------------------------------------------------------------
+                | Delete Confirmation
+                |--------------------------------------------------------------------------
+                */
+
+                document
+                    .querySelectorAll('.delete-form')
+                    .forEach(
+                        function(form) {
+
+                            form.addEventListener(
+                                'submit',
+                                function(event) {
+
+                                    if (
+                                        !confirm(
+                                            'Are you sure you want to delete this submission?'
+                                        )
+                                    ) {
+
+                                        event.preventDefault();
+
+                                    }
+
+                                }
+                            );
+
+                        }
+                    );
+
+            }
+        );
     </script>
 
 </body>
